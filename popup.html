@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=450, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>כמה שעות עבודה?</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Ensure proper loading */
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Screen Reader Announcements -->
+  <div id="announcer" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <!-- Skip to main content -->
+  <a href="#main-content" class="skip-link">דלג לתוכן הראשי</a>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1>כמה שעות עבודה?</h1>
+      <div class="toolbar" role="toolbar" aria-label="כלי נגישות והגדרות">
+        <button id="keyboardHelpBtn" class="icon-btn" aria-label="עזרת מקלדת" title="עזרת מקלדת (Alt+H)">
+          ⌨️
+        </button>
+        <button id="darkModeBtn" class="icon-btn" aria-label="מעבר למצב כהה" title="מצב כהה (Alt+D)">
+          🌙
+        </button>
+        <button id="settingsBtn" class="icon-btn" aria-label="הגדרות" title="הגדרות (Alt+S)">
+          ⚙️
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="main-content">
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="navigation" aria-label="ניווט ראשי">
+      <button class="nav-tab active" data-screen="home" aria-current="page">מחשבון</button>
+      <button class="nav-tab" data-screen="pending">
+        ממתינים
+        <span id="pendingBadge" class="badge hidden">0</span>
+      </button>
+      <button class="nav-tab" data-screen="wishlist">רשימה</button>
+      <button class="nav-tab" data-screen="history">היסטוריה</button>
+    </nav>
+
+    <!-- Settings Panel -->
+    <div id="settingsPanel" class="panel hidden">
+      <div class="panel-header">
+        <h2>הגדרות</h2>
+        <button id="closeSettings" class="close-btn" aria-label="סגור">&times;</button>
+      </div>
+      <div class="panel-body">
+        <div class="setting-group">
+          <h3>פרופילי שכר</h3>
+          <div id="wageProfilesList"></div>
+          <button id="addWageProfileBtn" class="btn btn-secondary" style="margin-top: 12px;">
+            ➕ הוסף פרופיל חדש
+          </button>
+        </div>
+
+        <div class="setting-group">
+          <h3>נגישות</h3>
+          <div class="setting-item">
+            <label for="fontSize">גודל גופן</label>
+            <select id="fontSize" class="input">
+              <option value="small">קטן</option>
+              <option value="normal" selected>רגיל</option>
+              <option value="large">גדול</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label for="highContrast">ניגודיות גבוהה</label>
+            <div class="toggle">
+              <input type="checkbox" id="highContrast" role="switch">
+              <span class="toggle-slider"></span>
+            </div>
+          </div>
+        </div>
+        <div id="categoriesSettings"></div>
+      </div>
+    </div>
+
+    <!-- Keyboard Help Modal -->
+    <div id="keyboardHelp" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>קיצורי מקלדת</h2>
+          <button class="close-btn" aria-label="סגור">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="shortcut"><kbd>Alt + 1</kbd><span>מחשבון</span></div>
+          <div class="shortcut"><kbd>Alt + 2</kbd><span>ממתינים</span></div>
+          <div class="shortcut"><kbd>Alt + 3</kbd><span>רשימת משאלות</span></div>
+          <div class="shortcut"><kbd>Alt + 4</kbd><span>היסטוריה</span></div>
+          <div class="shortcut"><kbd>Alt + S</kbd><span>הגדרות</span></div>
+          <div class="shortcut"><kbd>Alt + D</kbd><span>מצב כהה/בהיר</span></div>
+          <div class="shortcut"><kbd>Esc</kbd><span>סגור חלונות</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screens -->
+    <div id="homeScreen" class="screen active">
+      <!-- Calculator -->
+      <div class="card">
+        <div class="form-group">
+          <label for="categorySelect">קטגוריה</label>
+          <div id="categoryGrid" class="category-grid"></div>
+        </div>
+        <div class="form-group">
+          <label for="priceInput">מחיר (₪)</label>
+          <input type="number" id="priceInput" class="input input-lg" placeholder="0" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label for="wageSelect">פרופיל שכר</label>
+          <select id="wageSelect" class="input"></select>
+        </div>
+        <button id="calculateBtn" class="btn btn-primary btn-lg">חשב</button>
+      </div>
+
+      <!-- Result -->
+      <div id="resultCard" class="card hidden">
+        <div class="result-content">
+          <div class="result-category"></div>
+          <div class="result-hours"></div>
+          <h3 class="result-label">שעות עבודה</h3>
+          <div class="result-status"></div>
+        </div>
+        <div class="result-actions">
+          <button class="btn btn-primary" data-wait="24">חכה 24 שעות</button>
+          <button class="btn btn-primary" data-wait="48">חכה 48 שעות</button>
+          <button class="btn btn-primary" data-wait="72">חכה 72 שעות</button>
+          <button class="btn btn-secondary" id="addToWishlistBtn">שמור לרשימת משאלות</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="pendingScreen" class="screen">
+      <div id="pendingList"></div>
+    </div>
+
+    <div id="wishlistScreen" class="screen">
+      <div id="wishlistList"></div>
+    </div>
+
+    <div id="historyScreen" class="screen">
+      <div id="historyFilter" class="filter-bar"></div>
+      <div id="historyStats" class="stats-card hidden"></div>
+      <div id="historyList"></div>
+    </div>
+
+    <!-- Name Modal -->
+    <div id="nameModal" class="modal hidden">
+      <div class="modal-content">
+        <h2>מה שם הפריט?</h2>
+        <input type="text" id="itemNameInput" class="input" placeholder="למשל: אוזניות ביטול רעש">
+        <div class="modal-actions">
+          <button id="saveItemBtn" class="btn btn-primary">שמור</button>
+          <button class="btn btn-secondary close-modal">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wage Profile Modal -->
+    <div id="wageProfileModal" class="modal hidden">
+      <div class="modal-content">
+        <h2 id="wageProfileModalTitle">פרופיל שכר</h2>
+        <div class="form-group">
+          <label for="profileNameInput">שם הפרופיל</label>
+          <input type="text" id="profileNameInput" class="input" placeholder="למשל: עבודה משנית">
+        </div>
+        <div class="form-group">
+          <label for="hourlyWageInput">שכר לשעה (₪)</label>
+          <input type="number" id="hourlyWageInput" class="input" placeholder="60" min="1" step="0.5">
+        </div>
+        <div class="modal-actions">
+          <button id="saveProfileBtn" class="btn btn-primary">שמור</button>
+          <button class="btn btn-secondary close-modal">ביטול</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>
