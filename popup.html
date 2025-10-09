@@ -177,10 +177,43 @@
           <label for="profileNameInput">שם הפרופיל</label>
           <input type="text" id="profileNameInput" class="input" placeholder="למשל: עבודה משנית">
         </div>
+        
+        <!-- Wage Type Selection -->
         <div class="form-group">
+          <label for="wageTypeSelect">Wage Type</label>
+          <select id="wageTypeSelect" class="input">
+            <option value="hourly">Hourly Wage</option>
+            <option value="monthly">Monthly Wage</option>
+          </select>
+        </div>
+        
+        <!-- Hourly Wage Input -->
+        <div id="hourlyWageGroup" class="form-group">
           <label for="hourlyWageInput">שכר לשעה (₪)</label>
           <input type="number" id="hourlyWageInput" class="input" placeholder="60" min="1" step="0.5">
         </div>
+        
+        <!-- Monthly Wage Input -->
+        <div id="monthlyWageGroup" class="form-group hidden">
+          <label for="monthlyWageInput">שכר חודשי (₪)</label>
+          <input type="number" id="monthlyWageInput" class="input" placeholder="12000" min="1" step="100">
+        </div>
+        
+        <!-- Monthly Hours Input -->
+        <div id="monthlyHoursGroup" class="form-group hidden">
+          <label for="monthlyHoursInput">שעות עבודה בחודש</label>
+          <input type="number" id="monthlyHoursInput" class="input" placeholder="186" min="1" value="186">
+          <small style="color: var(--text-secondary); font-size: 0.75rem;">ברירת מחדל: 186 שעות</small>
+        </div>
+        
+        <!-- Gross/Net Checkbox -->
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="isGrossInput" style="width: 18px; height: 18px;">
+            <span>השכר הוא ברוטו (לפני ניכויים)</span>
+          </label>
+        </div>
+        
         <div class="modal-actions">
           <button id="saveProfileBtn" class="btn btn-primary">שמור</button>
           <button class="btn btn-secondary close-modal">ביטול</button>

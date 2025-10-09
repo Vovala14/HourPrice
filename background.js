@@ -1,16 +1,15 @@
 // Service Worker for Chrome Extension - Manifest V3
+// Updated with Monthly Wage & Gross/Net support
 
 // Handle alarms for pending items
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name.startsWith('pending-item-')) {
     const itemId = parseInt(alarm.name.replace('pending-item-', ''));
     
-    // Get item details from storage
     chrome.storage.local.get(['pendingItems'], (result) => {
       const item = result.pendingItems?.find(i => i.id === itemId);
       
       if (item) {
-        // Create notification
         chrome.notifications.create(`notify-${itemId}`, {
           type: 'basic',
           iconUrl: 'icons/icon128.png',
@@ -26,7 +25,6 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // Handle notification clicks
 chrome.notifications.onClicked.addListener((notificationId) => {
-  // Open the extension popup or a new tab
   chrome.action.openPopup?.();
   chrome.notifications.clear(notificationId);
 });
@@ -36,9 +34,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'setPendingAlarm') {
     const alarmName = `pending-item-${request.itemId}`;
     
-    // Clear existing alarm if any
     chrome.alarms.clear(alarmName, () => {
-      // Create new alarm
       chrome.alarms.create(alarmName, {
         when: request.waitUntil
       });
@@ -49,15 +45,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ success: true });
   }
   
-  return true; // Keep the message channel open for async response
+  return true;
 });
 
-// Install/Update event
+// Install/Update event - UPDATED DEFAULT DATA
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     console.log('🎉 תוסף "כמה שעות עבודה?" הותקן בהצלחה!');
     
-    // Set default values
+    // Set default values with new wage profile structure
     chrome.storage.local.set({
       darkMode: false,
       highContrast: false,
@@ -74,14 +70,45 @@ chrome.runtime.onInstalled.addListener((details) => {
         { id: 'travel', name: 'נסיעות', icon: '✈️', thresholds: { green: 8, amber: 20 } }
       ],
       wageProfiles: [
-        { id: 1, name: 'עבודה ראשית', hourlyWage: 60 }
+        { 
+          id: 1, 
+          name: 'עבודה ראשית', 
+          type: 'hourly',    // 'hourly' or 'monthly'
+          amount: 60,        // The wage amount
+          isGross: false,    // Whether this is gross (before tax) or net
+          monthlyHours: 186  // Hours per month (only used for monthly type)
+        }
       ],
+      selectedProfile: 1,
       pendingItems: [],
       wishlistItems: [],
       historyItems: []
     });
+    
   } else if (details.reason === 'update') {
     console.log('🔄 התוסף עודכן לגרסה החדשה');
+    
+    // Migration: Update old wage profiles to new structure
+    chrome.storage.local.get(['wageProfiles'], (result) => {
+      if (result.wageProfiles) {
+        const updated = result.wageProfiles.map(profile => {
+          // If profile doesn't have new fields, add them with defaults
+          if (!profile.type) {
+            return {
+              ...profile,
+              type: 'hourly',
+              amount: profile.hourlyWage || profile.amount || 60,
+              isGross: profile.isGross || false,
+              monthlyHours: profile.monthlyHours || 186
+            };
+          }
+          return profile;
+        });
+        
+        chrome.storage.local.set({ wageProfiles: updated });
+        console.log('✅ Migrated wage profiles to new structure');
+      }
+    });
   }
 });
 
